@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useEffect, useState } from 'react';
 import { fetchJSON } from '@/lib/api';
@@ -43,13 +44,21 @@ export default function Page() {
     <main className="max-w-6xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Autospec KPIs (MTD)</h1>
-        <button
-          className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
-          onClick={load}
-          disabled={loading}
-        >
-          {loading ? 'Refreshing…' : 'Refresh'}
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/sales-log"
+            className="rounded-xl bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-2 text-sm font-semibold"
+          >
+            View Sales Log
+          </Link>
+          <button
+            className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
+            onClick={load}
+            disabled={loading}
+          >
+            {loading ? 'Refreshing…' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       {err ? <p className="text-red-400 text-sm mb-4">Error: {err}</p> : null}
