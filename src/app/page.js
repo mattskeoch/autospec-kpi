@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Section from '@/components/Section';
 import { fetchJSON } from '@/lib/api';
+import KpiStat from '@/components/KpiStat';
+
 
 function fmtAUD(n) {
   return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
@@ -68,13 +70,38 @@ export default function Page() {
       {err ? <p className="text-red-400 text-sm mb-4">Error: {err}</p> : null}
 
       {/* HERO BAND */}
-      <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-sky-600/20 via-sky-500/10 to-emerald-500/10 border border-white/10">
+      {/* HERO BAND */}
+      <div className="rounded-3xl p-6 sm:p-8 bg-neutral-950 border border-white/10">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <KpiHeroCard label="MTD Sales (All)" value={fmtAUD(kpis.total_mtd)} />
-          <KpiHeroCard label="MTD – East (excl. Online)" value={fmtAUD(kpis.east_mtd)} />
-          <KpiHeroCard label="MTD – West (excl. Online)" value={fmtAUD(kpis.west_mtd)} />
+          <KpiStat
+            label="Earning"
+            value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.total_mtd)}
+            hint="vs last year"
+            delta={0.368}
+            deltaUp
+            line={[0.2, 0.55, 0.35, 0.85, 0.5, 0.7, 0.6, 0.75]}
+            accent="text-emerald-400"
+          />
+          <KpiStat
+            label="East (excl. Online)"
+            value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.east_mtd)}
+            hint="vs last month"
+            delta={-0.242}
+            deltaUp={false}
+            line={[0.1, 0.2, 0.35, 0.9, 0.55, 0.4, 0.32]}
+            accent="text-rose-400"
+          />
+          <KpiStat
+            label="West (excl. Online)"
+            value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.west_mtd)}
+            hint="vs last year"
+            delta={0.415}
+            deltaUp
+            line={[0.15, 0.6, 0.55, 0.45, 0.62, 0.58, 0.8]}
+            accent="text-emerald-400"
+          />
         </div>
-        <p className="text-xs text-neutral-300 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
+        <p className="text-xs text-neutral-400 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
       </div>
 
       {/* SECTION: Top Performers */}
