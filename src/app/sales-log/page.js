@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { fetchJSON } from '@/lib/api';
 
@@ -44,7 +45,7 @@ export default function SalesLogPage() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Sales Log (MTD)</h1>
         <div className="flex items-center gap-2">
-          <a href="/" className="text-sm text-neutral-300 hover:underline">← Dashboard</a>
+          <Link href="/" className="text-sm text-neutral-300 hover:underline">← Dashboard</Link>
           <button
             className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
             onClick={load}
