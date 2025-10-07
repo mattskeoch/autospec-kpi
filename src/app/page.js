@@ -1,5 +1,5 @@
 'use client';
-
+import { fetchJSON } from '.';
 import { useEffect, useState } from 'react';
 
 function fmtAUD(n) {
@@ -25,8 +25,8 @@ export default function Page() {
       setLoading(true);
       setErr('');
       const [k, r] = await Promise.all([
-        fetch('/api/kpis/mtd', { cache: 'no-store' }).then(res => res.json()),
-        fetch('/api/rep-table', { cache: 'no-store' }).then(res => res.json()),
+        fetchJSON('kpis/mtd'),
+        fetchJSON('rep-table'),
       ]);
       setKpis(k);
       setReps(r);
@@ -46,7 +46,7 @@ export default function Page() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Autospec KPIs (MTD)</h1>
         <button
-          className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
+          className="rounded-xl bg-red-700s hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
           onClick={load}
           disabled={loading}
         >
