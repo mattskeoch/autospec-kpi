@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx @cloudflare/next-on-pages@latest",
+    "build": "next build",
     "start": "wrangler pages dev .vercel/output/static --compatibility-date=2024-04-02",
     "lint": "eslint"
   },
