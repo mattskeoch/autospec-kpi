@@ -1,17 +1,15 @@
 'use client';
-import { fetchJSON } from '.';
+
 import { useEffect, useState } from 'react';
+import { fetchJSON } from '@/lib/api';
 
 function fmtAUD(n) {
   return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
     .format(Number(n || 0));
 }
 function pctStr(p) { return `${Math.round(Math.max(0, Math.min(1, p || 0)) * 100)}%`; }
-
 function top3(rows) {
-  return [...(rows || [])]
-    .sort((a, b) => (b.sales || 0) - (a.sales || 0))
-    .slice(0, 3);
+  return [...(rows || [])].sort((a, b) => (b.sales || 0) - (a.sales || 0)).slice(0, 3);
 }
 
 export default function Page() {
@@ -46,7 +44,7 @@ export default function Page() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Autospec KPIs (MTD)</h1>
         <button
-          className="rounded-xl bg-red-700 hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
+          className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
           onClick={load}
           disabled={loading}
         >
@@ -54,24 +52,18 @@ export default function Page() {
         </button>
       </div>
 
-      {err ? (
-        <p className="text-red-400 text-sm mb-4">Error: {err}</p>
-      ) : null}
+      {err ? <p className="text-red-400 text-sm mb-4">Error: {err}</p> : null}
 
-      {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <KpiCard label="Total Sales MTD" value={fmtAUD(kpis.total_mtd)} />
         <KpiCard label="East (excl. Online)" value={fmtAUD(kpis.east_mtd)} />
         <KpiCard label="West (excl. Online)" value={fmtAUD(kpis.west_mtd)} />
       </div>
 
-      {/* Top 3 salespeople */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
         {top.map((r, i) => (
           <div key={`${r.rep}-${i}`} className="rounded-2xl bg-neutral-800 p-6 shadow">
-            <div className="text-sm text-neutral-400 mb-1">
-              {['🥇', '🥈', '🥉'][i]} Top {i + 1}
-            </div>
+            <div className="text-sm text-neutral-400 mb-1">{['🥇', '🥈', '🥉'][i]} Top {i + 1}</div>
             <div className="text-xl font-semibold">{r.rep || 'Unassigned'}</div>
             <div className="text-2xl font-bold tabular-nums mt-2">{fmtAUD(r.sales)}</div>
             <div className="text-xs text-neutral-500 mt-2">Sales count: {r.salesCount ?? 0}</div>
@@ -84,12 +76,9 @@ export default function Page() {
         )}
       </div>
 
-      {/* Rep table */}
       <RepTable rows={reps.rows || []} />
 
-      <p className="text-xs text-neutral-500 mt-4">
-        As of {kpis.as_of || reps.as_of || ''}
-      </p>
+      <p className="text-xs text-neutral-500 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
     </main>
   );
 }
