@@ -1,11 +1,35 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { fetchJSON } from '@/lib/api';
 
 function fmtAUD(n) {
-  return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(Number(n || 0));
+  const num = Number.isFinite(Number(n)) ? Number(n) : 0;
+  return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(num);
+}
+
+// Force every field to primitives so React never sees objects.
+function sanitizeRow(r = {}) {
+  const s = (v) => (v == null ? '' : String(v));
+  const n = (v) => {
+    const x = Number(v);
+    return Number.isFinite(x) ? x : 0;
+  };
+  return {
+    date: s(r.date),
+    customer: s(r.customer),
+    salesperson: s(r.salesperson || '—'),
+    source: s(r.source),
+    orderNumber: s(r.orderNumber),
+    orderTotal: n(r.orderTotal),
+    outstanding: n(r.outstanding),
+    amountPaid: n(r.amountPaid),
+    // keep hidden/meta as strings too (in case we add links later)
+    shop: s(r.shop),
+    orderId: s(r.orderId ?? ''),
+    tags: s(r.tags),
+  };
 }
 
 export default function SalesLogPage() {
@@ -21,7 +45,9 @@ export default function SalesLogPage() {
     try {
       setLoading(true); setErr('');
       const res = await fetchJSON('sales-log');
-      setData(res || { rows: [], as_of: '' });
+      // sanitize everything up-front
+      const rows = Array.isArray(res?.rows) ? res.rows.map(sanitizeRow) : [];
+      setData({ rows, as_of: String(res?.as_of || '') });
     } catch (e) { setErr(String(e)); }
     finally { setLoading(false); }
   }
@@ -69,7 +95,7 @@ export default function SalesLogPage() {
         </select>
 
         <div className="ml-auto text-xs text-neutral-500 self-center">
-          As of {data.as_of || ''}
+          As of {data.as_of}
         </div>
       </div>
 
@@ -92,10 +118,10 @@ export default function SalesLogPage() {
             {filtered.map((r, i) => (
               <tr key={`${r.orderNumber}-${i}`} className="border-t border-neutral-800">
                 <Td>{r.date}</Td>
-                <Td className="font-medium">{r.customer || ''}</Td>
-                <Td className="font-medium">{r.salesperson || '—'}</Td>
-                <Td className="uppercase">{r.source || ''}</Td>
-                <Td>{r.orderNumber || ''}</Td>
+                <Td className="font-medium">{r.customer}</Td>
+                <Td className="font-medium">{r.salesperson}</Td>
+                <Td className="uppercase">{r.source}</Td>
+                <Td>{r.orderNumber}</Td>
                 <Td className="text-right">{fmtAUD(r.orderTotal)}</Td>
                 <Td className="text-right">{fmtAUD(r.outstanding)}</Td>
                 <Td className="text-right">{fmtAUD(r.amountPaid)}</Td>
