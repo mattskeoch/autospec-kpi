@@ -1,7 +1,8 @@
 'use client';
-import Link from 'next/link';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import Section from '@/components/Section';
 import { fetchJSON } from '@/lib/api';
 
 function fmtAUD(n) {
@@ -10,7 +11,9 @@ function fmtAUD(n) {
 }
 function pctStr(p) { return `${Math.round(Math.max(0, Math.min(1, p || 0)) * 100)}%`; }
 function top3(rows) {
-  return [...(rows || [])].sort((a, b) => (b.sales || 0) - (a.sales || 0)).slice(0, 3);
+  return [...(rows || [])]
+    .sort((a, b) => (b.sales || 0) - (a.sales || 0))
+    .slice(0, 3);
 }
 
 export default function Page() {
@@ -42,8 +45,9 @@ export default function Page() {
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-8">
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Autospec KPIs (MTD)</h1>
+        <h1 className="text-2xl font-semibold">Autospec KPIs</h1>
         <div className="flex items-center gap-2">
           <Link
             href="/sales-log"
@@ -63,78 +67,110 @@ export default function Page() {
 
       {err ? <p className="text-red-400 text-sm mb-4">Error: {err}</p> : null}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <KpiCard label="Total Sales MTD" value={fmtAUD(kpis.total_mtd)} />
-        <KpiCard label="East (excl. Online)" value={fmtAUD(kpis.east_mtd)} />
-        <KpiCard label="West (excl. Online)" value={fmtAUD(kpis.west_mtd)} />
+      {/* HERO BAND */}
+      <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-sky-600/20 via-sky-500/10 to-emerald-500/10 border border-white/10">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <KpiHeroCard label="MTD Sales (All)" value={fmtAUD(kpis.total_mtd)} />
+          <KpiHeroCard label="MTD – East (excl. Online)" value={fmtAUD(kpis.east_mtd)} />
+          <KpiHeroCard label="MTD – West (excl. Online)" value={fmtAUD(kpis.west_mtd)} />
+        </div>
+        <p className="text-xs text-neutral-300 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-        {top.map((r, i) => (
-          <div key={`${r.rep}-${i}`} className="rounded-2xl bg-neutral-800 p-6 shadow">
-            <div className="text-sm text-neutral-400 mb-1">{['🥇', '🥈', '🥉'][i]} Top {i + 1}</div>
-            <div className="text-xl font-semibold">{r.rep || 'Unassigned'}</div>
-            <div className="text-2xl font-bold tabular-nums mt-2">{fmtAUD(r.sales)}</div>
-            <div className="text-xs text-neutral-500 mt-2">Sales count: {r.salesCount ?? 0}</div>
-          </div>
-        ))}
-        {top.length === 0 && (
-          <div className="sm:col-span-3 rounded-2xl bg-neutral-800 p-6 shadow text-neutral-400 text-sm">
-            No salesperson data yet.
-          </div>
-        )}
-      </div>
+      {/* SECTION: Top Performers */}
+      <Section
+        title="Top Performers"
+        subtitle="MTD sales — medals update live as orders land"
+        right={<span className="text-xs text-neutral-500">{(reps.rows || []).length} reps</span>}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {top.map((r, i) => (
+            <Card key={`${r.rep}-${i}`}>
+              <div className="text-sm text-neutral-400 mb-1">
+                {['🥇', '🥈', '🥉'][i]} Top {i + 1}
+              </div>
+              <div className="text-xl font-semibold">{r.rep || 'Unassigned'}</div>
+              <div className="text-2xl font-bold tabular-nums mt-2">{fmtAUD(r.sales)}</div>
+              <div className="text-xs text-neutral-500 mt-2">Sales count: {r.salesCount ?? 0}</div>
+            </Card>
+          ))}
+          {top.length === 0 && (
+            <Card className="sm:col-span-3 text-neutral-400 text-sm">No salesperson data yet.</Card>
+          )}
+        </div>
+      </Section>
 
-      <RepTable rows={reps.rows || []} />
-
-      <p className="text-xs text-neutral-500 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
+      {/* SECTION: Team Leaderboard */}
+      <Section
+        title="Team Leaderboard"
+        subtitle="MTD by rep — excludes online orders"
+        right={
+          <div className="text-xs text-neutral-400">
+            Tip: keep your AOV high — it shows here
+          </div>
+        }
+      >
+        <RepTable rows={reps.rows || []} />
+      </Section>
     </main>
   );
 }
 
-function KpiCard({ label, value, children }) {
+/* ---------- Cards ---------- */
+
+function KpiHeroCard({ label, value }) {
   return (
-    <div className="rounded-2xl bg-neutral-800 p-6 shadow">
-      <div className="text-sm text-neutral-400 mb-1">{label}</div>
-      <div className="text-3xl font-bold tabular-nums">{value}</div>
-      {children ? <div className="text-xs text-neutral-500 mt-3">{children}</div> : null}
+    <div className="rounded-2xl bg-neutral-900/60 backdrop-blur p-6 border border-white/10 shadow-sm">
+      <div className="text-sm text-neutral-300">{label}</div>
+      <div className="text-4xl font-extrabold tabular-nums mt-2">{value}</div>
     </div>
   );
 }
 
+function Card({ children, className = '' }) {
+  return (
+    <div className={`rounded-2xl bg-neutral-800 p-6 shadow border border-white/5 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/* ---------- Table ---------- */
+
+function pct(v) { return Math.max(0, Math.min(1, Number(v || 0))); }
+
 function RepTable({ rows }) {
   return (
-    <div className="mt-6">
-      <h2 className="text-lg font-semibold mb-3">Sales by Rep (MTD)</h2>
+    <div className="mt-2">
       <div className="space-y-2">
-        {(rows || []).map((r) => (
-          <div key={r.rep} className="grid grid-cols-12 gap-4 bg-neutral-800 rounded-xl p-4">
+        {(rows || []).map((r, idx) => (
+          <div key={r.rep || idx} className="grid grid-cols-12 gap-4 bg-neutral-800 rounded-xl p-4 border border-white/5">
             <div className="col-span-3">
-              <div className="text-sm text-neutral-400">Rep</div>
-              <div className="font-semibold">{r.rep}</div>
+              <div className="text-xs text-neutral-400">Rep</div>
+              <div className="font-semibold">{r.rep || 'Unassigned'}</div>
             </div>
             <div className="col-span-2">
-              <div className="text-sm text-neutral-400">Sales</div>
+              <div className="text-xs text-neutral-400">Sales</div>
               <div className="font-semibold">{fmtAUD(r.sales)}</div>
             </div>
             <div className="col-span-2">
-              <div className="text-sm text-neutral-400">Deposits</div>
+              <div className="text-xs text-neutral-400">Deposits</div>
               <div className="font-semibold">{fmtAUD(r.deposits)}</div>
             </div>
             <div className="col-span-2">
-              <div className="text-sm text-neutral-400">Sales Count</div>
+              <div className="text-xs text-neutral-400">Sales Count</div>
               <div className="font-semibold">{r.salesCount ?? 0}</div>
             </div>
             <div className="col-span-3 space-y-2">
-              <div className="text-xs text-neutral-400">Sales Progress {pctStr(r.salesProgress)}</div>
-              <Bar pct={r.salesProgress} />
-              <div className="text-xs text-neutral-400 mt-2">Deposit Progress {pctStr(r.depositProgress)}</div>
-              <Bar pct={r.depositProgress} />
+              <div className="text-[11px] text-neutral-400">Sales Progress {pctStr(r.salesProgress)}</div>
+              <Bar pct={pct(r.salesProgress)} />
+              <div className="text-[11px] text-neutral-400 mt-2">Deposit Progress {pctStr(r.depositProgress)}</div>
+              <Bar pct={pct(r.depositProgress)} />
             </div>
           </div>
         ))}
         {(rows || []).length === 0 && (
-          <div className="rounded-2xl bg-neutral-800 p-6 shadow text-neutral-400 text-sm">
+          <div className="rounded-2xl bg-neutral-800 p-6 shadow text-neutral-400 text-sm border border-white/5">
             No rows yet.
           </div>
         )}
