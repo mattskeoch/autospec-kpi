@@ -1,95 +1,155 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
+import { useEffect, useState } from 'react';
+
+function fmtAUD(n) {
+  return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
+    .format(Number(n || 0));
+}
+function pctStr(p) { return `${Math.round(Math.max(0, Math.min(1, p || 0)) * 100)}%`; }
+
+function top3(rows) {
+  return [...(rows || [])]
+    .sort((a, b) => (b.sales || 0) - (a.sales || 0))
+    .slice(0, 3);
+}
+
+export default function Page() {
+  const [kpis, setKpis] = useState({ total_mtd: 0, east_mtd: 0, west_mtd: 0, as_of: '' });
+  const [reps, setReps] = useState({ rows: [], as_of: '' });
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+
+  async function load() {
+    try {
+      setLoading(true);
+      setErr('');
+      const [k, r] = await Promise.all([
+        fetch('/api/kpis/mtd', { cache: 'no-store' }).then(res => res.json()),
+        fetch('/api/rep-table', { cache: 'no-store' }).then(res => res.json()),
+      ]);
+      setKpis(k);
+      setReps(r);
+    } catch (e) {
+      setErr(String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  const top = top3(reps.rows);
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <main className="max-w-6xl mx-auto px-6 py-8">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-semibold">Autospec KPIs (MTD)</h1>
+        <button
+          className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
+          onClick={load}
+          disabled={loading}
+        >
+          {loading ? 'Refreshing…' : 'Refresh'}
+        </button>
+      </div>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      {err ? (
+        <p className="text-red-400 text-sm mb-4">Error: {err}</p>
+      ) : null}
+
+      {/* KPI cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <KpiCard label="Total Sales MTD" value={fmtAUD(kpis.total_mtd)} />
+        <KpiCard label="East (excl. Online)" value={fmtAUD(kpis.east_mtd)} />
+        <KpiCard label="West (excl. Online)" value={fmtAUD(kpis.west_mtd)} />
+      </div>
+
+      {/* Top 3 salespeople */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+        {top.map((r, i) => (
+          <div key={`${r.rep}-${i}`} className="rounded-2xl bg-neutral-800 p-6 shadow">
+            <div className="text-sm text-neutral-400 mb-1">
+              {['🥇', '🥈', '🥉'][i]} Top {i + 1}
+            </div>
+            <div className="text-xl font-semibold">{r.rep || 'Unassigned'}</div>
+            <div className="text-2xl font-bold tabular-nums mt-2">{fmtAUD(r.sales)}</div>
+            <div className="text-xs text-neutral-500 mt-2">Sales count: {r.salesCount ?? 0}</div>
+          </div>
+        ))}
+        {top.length === 0 && (
+          <div className="sm:col-span-3 rounded-2xl bg-neutral-800 p-6 shadow text-neutral-400 text-sm">
+            No salesperson data yet.
+          </div>
+        )}
+      </div>
+
+      {/* Rep table */}
+      <RepTable rows={reps.rows || []} />
+
+      <p className="text-xs text-neutral-500 mt-4">
+        As of {kpis.as_of || reps.as_of || ''}
+      </p>
+    </main>
+  );
+}
+
+function KpiCard({ label, value, children }) {
+  return (
+    <div className="rounded-2xl bg-neutral-800 p-6 shadow">
+      <div className="text-sm text-neutral-400 mb-1">{label}</div>
+      <div className="text-3xl font-bold tabular-nums">{value}</div>
+      {children ? <div className="text-xs text-neutral-500 mt-3">{children}</div> : null}
+    </div>
+  );
+}
+
+function RepTable({ rows }) {
+  return (
+    <div className="mt-6">
+      <h2 className="text-lg font-semibold mb-3">Sales by Rep (MTD)</h2>
+      <div className="space-y-2">
+        {(rows || []).map((r) => (
+          <div key={r.rep} className="grid grid-cols-12 gap-4 bg-neutral-800 rounded-xl p-4">
+            <div className="col-span-3">
+              <div className="text-sm text-neutral-400">Rep</div>
+              <div className="font-semibold">{r.rep}</div>
+            </div>
+            <div className="col-span-2">
+              <div className="text-sm text-neutral-400">Sales</div>
+              <div className="font-semibold">{fmtAUD(r.sales)}</div>
+            </div>
+            <div className="col-span-2">
+              <div className="text-sm text-neutral-400">Deposits</div>
+              <div className="font-semibold">{fmtAUD(r.deposits)}</div>
+            </div>
+            <div className="col-span-2">
+              <div className="text-sm text-neutral-400">Sales Count</div>
+              <div className="font-semibold">{r.salesCount ?? 0}</div>
+            </div>
+            <div className="col-span-3 space-y-2">
+              <div className="text-xs text-neutral-400">Sales Progress {pctStr(r.salesProgress)}</div>
+              <Bar pct={r.salesProgress} />
+              <div className="text-xs text-neutral-400 mt-2">Deposit Progress {pctStr(r.depositProgress)}</div>
+              <Bar pct={r.depositProgress} />
+            </div>
+          </div>
+        ))}
+        {(rows || []).length === 0 && (
+          <div className="rounded-2xl bg-neutral-800 p-6 shadow text-neutral-400 text-sm">
+            No rows yet.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Bar({ pct }) {
+  const p = Math.max(0, Math.min(1, Number(pct || 0)));
+  return (
+    <div className="h-2 w-full bg-neutral-700 rounded-full overflow-hidden">
+      <div className="h-full bg-white/80" style={{ width: `${(p * 100).toFixed(1)}%` }} />
     </div>
   );
 }
