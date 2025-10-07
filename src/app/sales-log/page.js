@@ -10,8 +10,17 @@ function fmtAUD(n) {
 }
 
 // Force every field to primitives so React never sees objects.
+// Force every field to primitives so React never sees objects.
 function sanitizeRow(r = {}) {
-  const s = (v) => (v == null ? '' : String(v));
+  const s = (v) => {
+    if (v == null) return '';
+    if (typeof v === 'object') {
+      if ('value' in v && v.value != null) return String(v.value);   // BigQuery { value: ... }
+      if (typeof v.toISOString === 'function') return v.toISOString().slice(0, 10);
+      return String(v);
+    }
+    return String(v);
+  };
   const n = (v) => {
     const x = Number(v);
     return Number.isFinite(x) ? x : 0;
@@ -25,7 +34,6 @@ function sanitizeRow(r = {}) {
     orderTotal: n(r.orderTotal),
     outstanding: n(r.outstanding),
     amountPaid: n(r.amountPaid),
-    // keep hidden/meta as strings too (in case we add links later)
     shop: s(r.shop),
     orderId: s(r.orderId ?? ''),
     tags: s(r.tags),
