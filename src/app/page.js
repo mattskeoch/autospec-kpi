@@ -46,7 +46,7 @@ export default function Page() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Autospec KPIs (MTD)</h1>
         <button
-          className="rounded-xl bg-red-700s hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
+          className="rounded-xl bg-red-700 hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
           onClick={load}
           disabled={loading}
         >
