@@ -94,7 +94,7 @@ export default function SalesLogPage() {
   return (
     <main className="max-w-6xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Sales Log (MTD)</h1>
+        <h1 className="text-2xl font-semibold">Sales Log</h1>
         <div className="flex items-center gap-2">
           <Link href="/" className="text-sm text-neutral-300 hover:underline">← Dashboard</Link>
           <button
