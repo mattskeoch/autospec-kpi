@@ -1,6 +1,8 @@
 import DashboardPage from '@/components/DashboardPage';
 import { currentYearMonth, fetchJSON } from '@/lib/api';
 
+export const runtime = 'edge';
+
 async function loadInitialData() {
   const ym = currentYearMonth();
 
