@@ -68,7 +68,7 @@ export default function SalesLogPage() {
 
   const filtered = useMemo(() => {
     return (data.rows || []).filter(r => {
-      const okSource = source === 'All' ? true : (r.source || '') === source;
+      const okSource = source === 'All' ? true : (r.source || '').toLowerCase() === source;
       const okRep = salesperson === 'All' ? true : (r.salesperson || '—') === salesperson;
       return okSource && okRep;
     });
