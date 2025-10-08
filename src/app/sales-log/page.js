@@ -10,7 +10,6 @@ function fmtAUD(n) {
 }
 
 // Force every field to primitives so React never sees objects.
-// Force every field to primitives so React never sees objects.
 function sanitizeRow(r = {}) {
   const s = (v) => {
     if (v == null) return '';
@@ -49,6 +48,8 @@ export default function SalesLogPage() {
   const [source, setSource] = useState('All');          // All | east | west | online
   const [salesperson, setSalesperson] = useState('All');// All or exact name
 
+  const normalizeSource = (value) => (value ?? '').trim().toLowerCase();
+
   async function load() {
     try {
       setLoading(true); setErr('');
@@ -66,9 +67,25 @@ export default function SalesLogPage() {
     return ['All', ...names];
   }, [data.rows]);
 
+  const sourceOptions = useMemo(() => {
+    const unique = new Set();
+    for (const row of data.rows || []) {
+      const normalized = normalizeSource(row.source);
+      if (normalized) unique.add(normalized);
+    }
+    return ['All', ...Array.from(unique).sort()];
+  }, [data.rows]);
+
+  useEffect(() => {
+    if (source !== 'All' && !sourceOptions.includes(source)) {
+      setSource('All');
+    }
+  }, [source, sourceOptions]);
+
   const filtered = useMemo(() => {
+    const selectedSource = source === 'All' ? null : source;
     return (data.rows || []).filter(r => {
-      const okSource = source === 'All' ? true : (r.source || '').toLowerCase() === source;
+      const okSource = selectedSource ? normalizeSource(r.source) === selectedSource : true;
       const okRep = salesperson === 'All' ? true : (r.salesperson || '—') === salesperson;
       return okSource && okRep;
     });
@@ -94,7 +111,9 @@ export default function SalesLogPage() {
       <div className="flex flex-wrap gap-3 mb-4">
         <label className="text-sm text-neutral-300">Source</label>
         <select value={source} onChange={e => setSource(e.target.value)} className="bg-neutral-800 rounded-lg px-3 py-2">
-          {['All', 'east', 'west', 'online'].map(x => <option key={x} value={x}>{x}</option>)}
+          {sourceOptions.map(x => (
+            <option key={x} value={x}>{x === 'All' ? x : x.toUpperCase()}</option>
+          ))}
         </select>
 
         <label className="text-sm text-neutral-300 ml-4">Salesperson</label>
