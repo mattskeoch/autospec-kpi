@@ -8,6 +8,7 @@ import KpiStat from '@/components/KpiStat';
 import Highlights from '@/components/Highlights';
 import Section from '@/components/Section';
 import SmallStat from '@/components/SmallStat';
+import ProgressStat from '@/components/ProgressStat';
 
 function fmtAUD(n) {
   return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
@@ -85,7 +86,7 @@ export default function Page() {
     <main className="max-w-6xl mx-auto px-6 py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Autospec KPIs</h1>
+        <h1 className="text-2xl font-semibold">Autospec Sales Dashboard</h1>
         <div className="flex items-center gap-2">
           <Link
             href="/sales-log"
@@ -135,57 +136,47 @@ export default function Page() {
             deltaUp={(kpis.delta_west_vs_last_month ?? 0) >= 0}
             line={[0.15, 0.6, 0.55, 0.45, 0.62, 0.58, 0.8]}
           />
-          {/* Progress vs targets */}
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-neutral-800 p-5">
-              <div className="text-sm text-neutral-400 mb-1">Sales vs Target (MTD)</div>
-              <div className="flex items-baseline justify-between mb-2">
-                <div className="text-xl font-semibold">
-                  {fmtAUD(kpis.total_mtd)} <span className="text-neutral-500 text-sm">/ {fmtAUD(salesTarget)}</span>
-                </div>
-                <div className="text-sm text-neutral-400">{Math.round(salesProgressPct * 100)}%</div>
-              </div>
-              <Bar pct={salesProgressPct} />
-            </div>
-
-            <div className="rounded-2xl bg-neutral-800 p-5">
-              <div className="text-sm text-neutral-400 mb-1">Deposits vs Target (MTD)</div>
-              <div className="flex items-baseline justify-between mb-2">
-                <div className="text-xl font-semibold">
-                  {fmtAUD(high?.totals?.total_deposits_mtd || 0)} <span className="text-neutral-500 text-sm">/ {fmtAUD(depositsTarget)}</span>
-                </div>
-                <div className="text-sm text-neutral-400">{Math.round(depositsProgressPct * 100)}%</div>
-              </div>
-              <Bar pct={depositsProgressPct} />
-            </div>
-          </div>
-
 
 
         </div>
-        {/* Secondary KPIs (no sparklines) */}
-        <div className="mt-4 pt-2">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <SmallStat
-              label="Total Deposits"
-              value={new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
-                .format(Number((high?.totals?.total_deposits_mtd) || 0))}
-            />
-            <SmallStat
-              label="Online Sales"
-              value={new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
-                .format(Number((high?.totals?.online_sales_mtd) || 0))}
-            />
-            <SmallStat
-              label="Partner Sales"
-              value={new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
-                .format(Number((high?.totals?.partner_sales_mtd) || 0))}
-            />
-          </div>
-        </div>
+
+
 
         <p className="text-xs text-neutral-400 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
       </div>
+
+      {/* Secondary KPIs (progress cards) */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <ProgressStat
+          label="Sales vs Target"
+          value={Number(kpis?.total_mtd || 0)}
+          target={Number(salesTarget || 0)}
+          percent={salesTarget ? Number(kpis?.total_mtd || 0) / salesTarget : 0}
+        />
+
+        <ProgressStat
+          label="Deposits vs Target"
+          value={Number(high?.totals?.total_deposits_mtd || 0)}
+          target={Number(depositsTarget || 0)}
+          percent={
+            depositsTarget
+              ? Number(high?.totals?.total_deposits_mtd || 0) / depositsTarget
+              : 0
+          }
+        />
+
+        {/* No targets yet – same styling, shows “—” and a muted bar */}
+        <ProgressStat
+          label="Online Sales vs Target"
+          value={Number(high?.totals?.online_sales_mtd || 0)}
+        />
+
+        <ProgressStat
+          label="Partner Sales vs Target"
+          value={Number(high?.totals?.partner_sales_mtd || 0)}
+        />
+      </div>
+
 
       {/* SECTION: Top Performers */}
       <Section
