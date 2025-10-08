@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Section from '@/components/Section';
 import { fetchJSON } from '@/lib/api';
+import { currentYearMonth } from '@/lib/api';
+import Link from 'next/link';
 import KpiStat from '@/components/KpiStat';
-
+import Highlights from '@/components/Highlights';
+import Section from '@/components/Section';
+import SmallStat from '@/components/SmallStat';
 
 function fmtAUD(n) {
   return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
@@ -18,22 +20,43 @@ function top3(rows) {
     .slice(0, 3);
 }
 
+// --- helper to pull a target row (month already handled when fetching) ---
+function pickTarget(rows, metric, scope = 'org', key = 'all') {
+  const row = (rows || []).find(
+    r => (r.scope || '').toLowerCase() === scope &&
+      (r.key || '').toLowerCase() === key &&
+      (r.metric || '').toLowerCase() === metric
+  );
+  return Number(row?.target || 0);
+}
+
 export default function Page() {
   const [kpis, setKpis] = useState({ total_mtd: 0, east_mtd: 0, west_mtd: 0, as_of: '' });
   const [reps, setReps] = useState({ rows: [], as_of: '' });
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
+  const [high, setHigh] = useState(null);
+  const [targets, setTargets] = useState({ month: '', rows: [] });
+
 
   async function load() {
     try {
       setLoading(true);
       setErr('');
-      const [k, r] = await Promise.all([
+
+      const ym = currentYearMonth();
+
+      const [k, r, h, t] = await Promise.all([
         fetchJSON('kpis/mtd'),
         fetchJSON('rep-table'),
+        fetchJSON('kpis/highlights'),
+        fetchJSON(`targets?month=${ym}`),
       ]);
+
       setKpis(k);
       setReps(r);
+      setHigh(h);
+      setTargets(t);
     } catch (e) {
       setErr(String(e));
     } finally {
@@ -41,9 +64,22 @@ export default function Page() {
     }
   }
 
+
   useEffect(() => { load(); }, []);
 
   const top = top3(reps.rows);
+  // --- computed values for progress vs targets (org-level) ---
+  const salesTarget = pickTarget(targets?.rows, 'sales');       // scope='org', key='all'
+  const depositsTarget = pickTarget(targets?.rows, 'deposits');
+
+  const salesProgressPct = salesTarget
+    ? Math.min(1, Number(kpis?.total_mtd || 0) / salesTarget)
+    : 0;
+
+  const depositsProgressPct = depositsTarget
+    ? Math.min(1, Number(high?.totals?.total_deposits_mtd || 0) / depositsTarget)
+    : 0;
+
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-8">
@@ -99,8 +135,55 @@ export default function Page() {
             deltaUp={(kpis.delta_west_vs_last_month ?? 0) >= 0}
             line={[0.15, 0.6, 0.55, 0.45, 0.62, 0.58, 0.8]}
           />
+          {/* Progress vs targets */}
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-2xl bg-neutral-800 p-5">
+              <div className="text-sm text-neutral-400 mb-1">Sales vs Target (MTD)</div>
+              <div className="flex items-baseline justify-between mb-2">
+                <div className="text-xl font-semibold">
+                  {fmtAUD(kpis.total_mtd)} <span className="text-neutral-500 text-sm">/ {fmtAUD(salesTarget)}</span>
+                </div>
+                <div className="text-sm text-neutral-400">{Math.round(salesProgressPct * 100)}%</div>
+              </div>
+              <Bar pct={salesProgressPct} />
+            </div>
+
+            <div className="rounded-2xl bg-neutral-800 p-5">
+              <div className="text-sm text-neutral-400 mb-1">Deposits vs Target (MTD)</div>
+              <div className="flex items-baseline justify-between mb-2">
+                <div className="text-xl font-semibold">
+                  {fmtAUD(high?.totals?.total_deposits_mtd || 0)} <span className="text-neutral-500 text-sm">/ {fmtAUD(depositsTarget)}</span>
+                </div>
+                <div className="text-sm text-neutral-400">{Math.round(depositsProgressPct * 100)}%</div>
+              </div>
+              <Bar pct={depositsProgressPct} />
+            </div>
+          </div>
+
+
 
         </div>
+        {/* Secondary KPIs (no sparklines) */}
+        <div className="mt-4 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <SmallStat
+              label="Total Deposits"
+              value={new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
+                .format(Number((high?.totals?.total_deposits_mtd) || 0))}
+            />
+            <SmallStat
+              label="Online Sales"
+              value={new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
+                .format(Number((high?.totals?.online_sales_mtd) || 0))}
+            />
+            <SmallStat
+              label="Partner Sales"
+              value={new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
+                .format(Number((high?.totals?.partner_sales_mtd) || 0))}
+            />
+          </div>
+        </div>
+
         <p className="text-xs text-neutral-400 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
       </div>
 
@@ -114,11 +197,11 @@ export default function Page() {
           {top.map((r, i) => (
             <Card key={`${r.rep}-${i}`}>
               <div className="text-sm text-neutral-400 mb-1">
-                {['🥇', '🥈', '🥉'][i]} Top {i + 1}
+                {['🥇', '🥈', '🥉'][i]} #{i + 1}
               </div>
               <div className="text-xl font-semibold">{r.rep || 'Unassigned'}</div>
-              <div className="text-2xl font-bold tabular-nums mt-2">{fmtAUD(r.sales)}</div>
-              <div className="text-xs text-neutral-500 mt-2">Sales count: {r.salesCount ?? 0}</div>
+              <div className="text-4xl font-bold tabular-nums mt-2">{fmtAUD(r.sales)}</div>
+              {/* <div className="text-xs text-neutral-500 mt-2">Sales count: {r.salesCount ?? 0}</div> */}
             </Card>
           ))}
           {top.length === 0 && (
@@ -127,13 +210,20 @@ export default function Page() {
         </div>
       </Section>
 
+      {high && (
+        <div className="mt-6">
+          <Highlights data={high} />
+        </div>
+      )}
+
+
       {/* SECTION: Team Leaderboard */}
       <Section
         title="Team Leaderboard"
-        subtitle="MTD by rep — excludes online orders"
+        subtitle="MTD by rep"
         right={
           <div className="text-xs text-neutral-400">
-            Tip: keep your AOV high — it shows here
+            Help text?
           </div>
         }
       >

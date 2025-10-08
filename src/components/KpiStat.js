@@ -23,7 +23,7 @@ export default function KpiStat({
       <div>
         <div className="text-sm text-neutral-300 flex items-center gap-1">
           {label}
-          <span className="text-neutral-500">?</span>
+          {/* <span className="text-neutral-500">?</span> */}
         </div>
         <div className="mt-1">
           <span className="text-neutral-400 align-top mr-1">$</span>
