@@ -114,6 +114,7 @@ export default function DashboardPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Autospec Sales Dashboard</h1>
+
         <div className="flex items-center gap-2">
           <Link
             href="/sales-log"
@@ -130,47 +131,47 @@ export default function DashboardPage({
           </button>
         </div>
       </div>
-
+      <p className="text-xs text-neutral-400 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
       {err ? <p className="text-red-400 text-sm mb-4">Error: {err}</p> : null}
 
       {/* HERO BAND */}
-      <div className="rounded-3xl p-6 sm:p-8 bg-neutral-950 border border-white/10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <KpiStat
-            label="MTD Sales (All)"
-            value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.total_mtd)}
-            hint="vs last month"
-            delta={kpis.delta_all_vs_last_month}
-            deltaUp={(kpis.delta_all_vs_last_month ?? 0) >= 0}
-            line={[0.2, 0.55, 0.35, 0.85, 0.5, 0.7, 0.6, 0.75]}
-          />
 
-          <KpiStat
-            label="East"
-            value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.east_mtd)}
-            hint="vs last month"
-            delta={kpis.delta_east_vs_last_month}
-            deltaUp={(kpis.delta_east_vs_last_month ?? 0) >= 0}
-            line={[0.1, 0.2, 0.35, 0.9, 0.55, 0.4, 0.32]}
-            accent="text-rose-400"
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <KpiStat
+          label="MTD Sales (All)"
+          value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.total_mtd)}
+          hint="vs last month"
+          delta={kpis.delta_all_vs_last_month}
+          deltaUp={(kpis.delta_all_vs_last_month ?? 0) >= 0}
+          line={[0.2, 0.55, 0.35, 0.85, 0.5, 0.7, 0.6, 0.75]}
+        />
 
-          <KpiStat
-            label="West"
-            value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.west_mtd)}
-            hint="vs last month"
-            delta={kpis.delta_west_vs_last_month}
-            deltaUp={(kpis.delta_west_vs_last_month ?? 0) >= 0}
-            line={[0.15, 0.6, 0.55, 0.45, 0.62, 0.58, 0.8]}
-          />
+        <KpiStat
+          label="East"
+          value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.east_mtd)}
+          hint="vs last month"
+          delta={kpis.delta_east_vs_last_month}
+          deltaUp={(kpis.delta_east_vs_last_month ?? 0) >= 0}
+          line={[0.1, 0.2, 0.35, 0.9, 0.55, 0.4, 0.32]}
+          accent="text-rose-400"
+        />
 
-
-        </div>
+        <KpiStat
+          label="West"
+          value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.west_mtd)}
+          hint="vs last month"
+          delta={kpis.delta_west_vs_last_month}
+          deltaUp={(kpis.delta_west_vs_last_month ?? 0) >= 0}
+          line={[0.15, 0.6, 0.55, 0.45, 0.62, 0.58, 0.8]}
+        />
 
 
-
-        <p className="text-xs text-neutral-400 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
       </div>
+
+
+
+
+
 
       {/* Secondary KPIs (progress cards) */}
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
