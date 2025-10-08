@@ -95,8 +95,6 @@ export default function DashboardPage({
     }
   }, [hasInitialData, load]);
 
-  const showSkeleton = loading && !hasInitialData;
-
   const top = top3(reps.rows);
   // --- computed values for progress vs targets (org-level) ---
   const salesTarget = pickTarget(targets?.rows, 'sales');       // scope='org', key='all'
@@ -116,6 +114,7 @@ export default function DashboardPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Autospec Sales Dashboard</h1>
+
         <div className="flex items-center gap-2">
           <Link
             href="/sales-log"
@@ -132,86 +131,78 @@ export default function DashboardPage({
           </button>
         </div>
       </div>
-
+      <p className="text-xs text-neutral-400 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
       {err ? <p className="text-red-400 text-sm mb-4">Error: {err}</p> : null}
 
       {/* HERO BAND */}
-      <div className="rounded-3xl p-6 sm:p-8 bg-neutral-950 border border-white/10">
-        {showSkeleton ? (
-          <HeroSkeleton />
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <KpiStat
-                label="MTD Sales (All)"
-                value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.total_mtd)}
-                hint="vs last month"
-                delta={kpis.delta_all_vs_last_month}
-                deltaUp={(kpis.delta_all_vs_last_month ?? 0) >= 0}
-                line={[0.2, 0.55, 0.35, 0.85, 0.5, 0.7, 0.6, 0.75]}
-              />
 
-              <KpiStat
-                label="East"
-                value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.east_mtd)}
-                hint="vs last month"
-                delta={kpis.delta_east_vs_last_month}
-                deltaUp={(kpis.delta_east_vs_last_month ?? 0) >= 0}
-                line={[0.1, 0.2, 0.35, 0.9, 0.55, 0.4, 0.32]}
-                accent="text-rose-400"
-              />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <KpiStat
+          label="MTD Sales (All)"
+          value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.total_mtd)}
+          hint="vs last month"
+          delta={kpis.delta_all_vs_last_month}
+          deltaUp={(kpis.delta_all_vs_last_month ?? 0) >= 0}
+          line={[0.2, 0.55, 0.35, 0.85, 0.5, 0.7, 0.6, 0.75]}
+        />
 
-              <KpiStat
-                label="West"
-                value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.west_mtd)}
-                hint="vs last month"
-                delta={kpis.delta_west_vs_last_month}
-                deltaUp={(kpis.delta_west_vs_last_month ?? 0) >= 0}
-                line={[0.15, 0.6, 0.55, 0.45, 0.62, 0.58, 0.8]}
-              />
-            </div>
+        <KpiStat
+          label="East"
+          value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.east_mtd)}
+          hint="vs last month"
+          delta={kpis.delta_east_vs_last_month}
+          deltaUp={(kpis.delta_east_vs_last_month ?? 0) >= 0}
+          line={[0.1, 0.2, 0.35, 0.9, 0.55, 0.4, 0.32]}
+          accent="text-rose-400"
+        />
 
-            <p className="text-xs text-neutral-400 mt-4">As of {kpis.as_of || reps.as_of || ''}</p>
-          </>
-        )}
+        <KpiStat
+          label="West"
+          value={new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(kpis.west_mtd)}
+          hint="vs last month"
+          delta={kpis.delta_west_vs_last_month}
+          deltaUp={(kpis.delta_west_vs_last_month ?? 0) >= 0}
+          line={[0.15, 0.6, 0.55, 0.45, 0.62, 0.58, 0.8]}
+        />
+
+
       </div>
+
+
+
+
+
 
       {/* Secondary KPIs (progress cards) */}
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {showSkeleton ? (
-          <ProgressSkeleton />
-        ) : (
-          <>
-            <ProgressStat
-              label="Sales vs Target"
-              value={Number(kpis?.total_mtd || 0)}
-              target={Number(salesTarget || 0)}
-              percent={salesTarget ? Number(kpis?.total_mtd || 0) / salesTarget : 0}
-            />
+        <ProgressStat
+          label="Sales vs Target"
+          value={Number(kpis?.total_mtd || 0)}
+          target={Number(salesTarget || 0)}
+          percent={salesTarget ? Number(kpis?.total_mtd || 0) / salesTarget : 0}
+        />
 
-            <ProgressStat
-              label="Deposits vs Target"
-              value={Number(high?.totals?.total_deposits_mtd || 0)}
-              target={Number(depositsTarget || 0)}
-              percent={
-                depositsTarget
-                  ? Number(high?.totals?.total_deposits_mtd || 0) / depositsTarget
-                  : 0
-              }
-            />
+        <ProgressStat
+          label="Deposits vs Target"
+          value={Number(high?.totals?.total_deposits_mtd || 0)}
+          target={Number(depositsTarget || 0)}
+          percent={
+            depositsTarget
+              ? Number(high?.totals?.total_deposits_mtd || 0) / depositsTarget
+              : 0
+          }
+        />
 
-            {/* No targets yet – same styling, shows “—” and a muted bar */}
-            <ProgressStat
-              label="Online Sales vs Target"
-              value={Number(high?.totals?.online_sales_mtd || 0)}
-            />
+        {/* No targets yet – same styling, shows “—” and a muted bar */}
+        <ProgressStat
+          label="Online Sales vs Target"
+          value={Number(high?.totals?.online_sales_mtd || 0)}
+        />
 
-            <ProgressStat
-              label="Partner Sales vs Target"
-              value={Number(high?.totals?.partner_sales_mtd || 0)}
-            />
-          </>
-        )}
+        <ProgressStat
+          label="Partner Sales vs Target"
+          value={Number(high?.totals?.partner_sales_mtd || 0)}
+        />
       </div>
 
 
@@ -221,35 +212,27 @@ export default function DashboardPage({
         subtitle="MTD sales — medals update live as orders land"
         right={<span className="text-xs text-neutral-500">{(reps.rows || []).length} reps</span>}
       >
-        {showSkeleton ? (
-          <TopPerformersSkeleton />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {top.map((r, i) => (
-              <Card key={`${r.rep}-${i}`}>
-                <div className="text-sm text-neutral-400 mb-1">
-                  {['🥇', '🥈', '🥉'][i]} #{i + 1}
-                </div>
-                <div className="text-xl font-semibold">{r.rep || 'Unassigned'}</div>
-                <div className="text-4xl font-bold tabular-nums mt-2">{fmtAUD(r.sales)}</div>
-                {/* <div className="text-xs text-neutral-500 mt-2">Sales count: {r.salesCount ?? 0}</div> */}
-              </Card>
-            ))}
-            {top.length === 0 && (
-              <Card className="sm:col-span-3 text-neutral-400 text-sm">No salesperson data yet.</Card>
-            )}
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {top.map((r, i) => (
+            <Card key={`${r.rep}-${i}`}>
+              <div className="text-sm text-neutral-400 mb-1">
+                {['🥇', '🥈', '🥉'][i]} #{i + 1}
+              </div>
+              <div className="text-xl font-semibold">{r.rep || 'Unassigned'}</div>
+              <div className="text-4xl font-bold tabular-nums mt-2">{fmtAUD(r.sales)}</div>
+              {/* <div className="text-xs text-neutral-500 mt-2">Sales count: {r.salesCount ?? 0}</div> */}
+            </Card>
+          ))}
+          {top.length === 0 && (
+            <Card className="sm:col-span-3 text-neutral-400 text-sm">No salesperson data yet.</Card>
+          )}
+        </div>
       </Section>
 
-      {showSkeleton ? (
-        <HighlightsSkeleton />
-      ) : (
-        high && (
-          <div className="mt-6">
-            <Highlights data={high} />
-          </div>
-        )
+      {high && (
+        <div className="mt-6">
+          <Highlights data={high} />
+        </div>
       )}
 
 
@@ -263,7 +246,7 @@ export default function DashboardPage({
           </div>
         }
       >
-        {showSkeleton ? <RepTableSkeleton /> : <RepTable rows={reps.rows || []} />}
+        <RepTable rows={reps.rows || []} />
       </Section>
     </main>
   );
@@ -284,102 +267,6 @@ function Card({ children, className = '' }) {
   return (
     <div className={`rounded-2xl bg-neutral-800 p-6 shadow border border-white/5 ${className}`}>
       {children}
-    </div>
-  );
-}
-
-/* ---------- Skeletons ---------- */
-
-function SkeletonBox({ className = '' }) {
-  return <div className={`animate-pulse bg-neutral-800/70 rounded-xl ${className}`} />;
-}
-
-function HeroSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[1, 2, 3].map(key => (
-          <div key={key} className="rounded-2xl bg-neutral-900/60 border border-white/10 p-6">
-            <SkeletonBox className="h-4 w-28" />
-            <SkeletonBox className="h-10 w-32 mt-4" />
-            <SkeletonBox className="h-3 w-full mt-4" />
-          </div>
-        ))}
-      </div>
-      <SkeletonBox className="h-3 w-32" />
-    </div>
-  );
-}
-
-function ProgressSkeleton() {
-  return (
-    <>
-      {[1, 2, 3, 4].map(key => (
-        <div key={key} className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5">
-          <SkeletonBox className="h-4 w-32" />
-          <SkeletonBox className="h-8 w-24 mt-4" />
-          <SkeletonBox className="h-2 w-full mt-4" />
-        </div>
-      ))}
-    </>
-  );
-}
-
-function TopPerformersSkeleton() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {[1, 2, 3].map(key => (
-        <Card key={key}>
-          <SkeletonBox className="h-4 w-20" />
-          <SkeletonBox className="h-6 w-24 mt-4" />
-          <SkeletonBox className="h-10 w-28 mt-4" />
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-function HighlightsSkeleton() {
-  return (
-    <div className="mt-6 grid grid-cols-1 gap-4">
-      <Card className="space-y-3">
-        <SkeletonBox className="h-4 w-32" />
-        <SkeletonBox className="h-4 w-full" />
-        <SkeletonBox className="h-4 w-2/3" />
-      </Card>
-    </div>
-  );
-}
-
-function RepTableSkeleton() {
-  return (
-    <div className="mt-2 space-y-3">
-      {[1, 2, 3, 4].map(key => (
-        <div key={key} className="grid grid-cols-12 gap-4 bg-neutral-800 rounded-xl p-4 border border-white/5 animate-pulse">
-          <div className="col-span-3 space-y-2">
-            <SkeletonBox className="h-3 w-16" />
-            <SkeletonBox className="h-4 w-24" />
-          </div>
-          <div className="col-span-2 space-y-2">
-            <SkeletonBox className="h-3 w-16" />
-            <SkeletonBox className="h-4 w-20" />
-          </div>
-          <div className="col-span-2 space-y-2">
-            <SkeletonBox className="h-3 w-16" />
-            <SkeletonBox className="h-4 w-20" />
-          </div>
-          <div className="col-span-2 space-y-2">
-            <SkeletonBox className="h-3 w-20" />
-            <SkeletonBox className="h-4 w-16" />
-          </div>
-          <div className="col-span-3 space-y-3">
-            <SkeletonBox className="h-3 w-28" />
-            <SkeletonBox className="h-2 w-full" />
-            <SkeletonBox className="h-3 w-32" />
-            <SkeletonBox className="h-2 w-full" />
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
