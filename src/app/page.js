@@ -1,23 +1,21 @@
 import DashboardPage from '@/components/DashboardPage';
 import { currentYearMonth, fetchJSON } from '@/lib/api';
 
-// Cloudflare Pages requires the root page to run on the Edge runtime.
-// Declaring it here keeps the build green and documents why this page is
-// compiled for Edge rather than the default Node.js runtime.
 export const runtime = 'edge';
 
 async function loadInitialData() {
   const ym = currentYearMonth();
 
   try {
-    const [kpis, reps, highlights, targets] = await Promise.all([
+    const [kpis, reps, highlights, targets, salesLog] = await Promise.all([
       fetchJSON('kpis/mtd'),
       fetchJSON('rep-table'),
       fetchJSON('kpis/highlights'),
       fetchJSON(`targets?month=${ym}`),
+      fetchJSON('sales-log'),
     ]);
 
-    return { kpis, reps, highlights, targets };
+    return { kpis, reps, highlights, targets, salesLog };
   } catch (error) {
     console.error('Failed to prefetch dashboard data', error);
     return { error: error instanceof Error ? error.message : 'Unknown error' };
@@ -33,6 +31,7 @@ export default async function Page() {
       initialReps={initial.reps}
       initialHighlights={initial.highlights}
       initialTargets={initial.targets}
+      initialSalesLog={initial.salesLog}
       initialError={initial.error}
     />
   );

@@ -13,17 +13,22 @@ export default function KpiStat({
   label,
   value,
   hint = 'vs last period',
-  delta = null,           // number like 0.368 -> 36.8%
-  deltaUp = true,         // green vs red
-  line = [],              // sparkline numbers
-  accent = 'text-emerald-400', // stroke colour for the line
+  delta = null,                 // number like 0.368 -> 36.8%
+  deltaUp = true,               // green vs red
+  line = [],                    // sparkline numbers
+  accent = 'text-emerald-400',  // stroke colour for the line
+  variant = 'plain',            // 'plain' (no bg/border) | 'card' (old look)
 }) {
+  const shell =
+    variant === 'card'
+      ? 'rounded-2xl bg-neutral-900/70 border border-white/10 p-5 sm:p-6'
+      : 'p-4 bg-transparent border-0'; // plain, to sit on the shared section bg
+
   return (
-    <div className="rounded-2xl bg-neutral-900/70 border border-white/10 p-5 sm:p-6 flex items-center justify-between gap-6">
+    <div className={`${shell} flex items-center justify-between gap-6`}>
       <div>
         <div className="text-sm text-neutral-300 flex items-center gap-1">
           {label}
-          {/* <span className="text-neutral-500">?</span> */}
         </div>
         <div className="mt-1">
           <span className="text-neutral-400 align-top mr-1">$</span>

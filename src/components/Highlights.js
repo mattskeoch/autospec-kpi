@@ -1,4 +1,4 @@
-export default function Highlights({ data }) {
+export default function Highlights({ data, variant = 'plain', className = '' }) {
   if (!data) return null;
 
   const money = (n) =>
@@ -8,42 +8,62 @@ export default function Highlights({ data }) {
       maximumFractionDigits: 0,
     }).format(Number(n || 0));
 
-  const Card = ({ emoji, label, text }) => (
-    <div className="rounded-xl bg-neutral-900/70 border border-white/10 p-4">
-      <div className="text-sm text-neutral-400 flex items-center gap-2">
-        <span className="text-base">{emoji}</span>
-        <span>{label}</span>
+  // Compact circular icon badge (matches podium badges)
+  function IconBadge({ name, title, className = '' }) {
+    return (
+      <span
+        className={`grid h-8 w-8 sm:h-9 sm:w-9 justify-start ${className}`}
+        aria-hidden="true"
+        title={title}
+      >
+        <i className={`${name} text-base sm:text-lg text-neutral-400`} />
+      </span>
+    );
+  }
+
+  // Borderless, transparent tile (section provides the bg)
+  function Tile({ icon, label, text }) {
+    return (
+      <div className="p-4 sm:p-6 flex flex-col items-start">
+        <IconBadge name={icon} title={label} className="self-start" />
+        <div className="text-sm text-neutral-400">{label}</div>
+        <div className="text-lg font-semibold">{text}</div>
       </div>
-      <div className="mt-1 text-lg font-semibold">{text}</div>
-    </div>
-  );
+    );
+  }
 
   const ls = data.largest_sale_mtd || {};
   const ld = data.largest_deposits_mtd || {};
   const mc = data.most_sales_count_mtd || {};
   const fy = data.highest_sales_fy || {};
 
+  // Optional outer shell when variant="card"
+  const wrapperClass =
+    variant === 'card'
+      ? 'rounded-2xl bg-neutral-900/70 p-4 sm:p-5'
+      : '';
+
   return (
-    <div className="rounded-2xl bg-neutral-900/70 border border-white/10 p-4 sm:p-5">
+    <div className={`${wrapperClass} ${className}`}>
       {/* 1 col mobile, 2 col tablet, 4 col desktop */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card
-          emoji="🐋"
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Tile
+          icon="ri-money-dollar-circle-line"
           label="Largest Sale"
           text={`${ls.rep || '—'}: ${money(ls.amount)}`}
         />
-        <Card
-          emoji="🏦"
+        <Tile
+          icon="ri-bank-line"
           label="Most Deposits"
           text={`${ld.rep || '—'}: ${money(ld.amount)}`}
         />
-        <Card
-          emoji="🔥"
+        <Tile
+          icon="ri-fire-line"
           label="Most Sales"
           text={`${mc.rep || '—'}: ${Number(mc.count || 0)}`}
         />
-        <Card
-          emoji="📈"
+        <Tile
+          icon="ri-line-chart-line"
           label="Highest Sales FY"
           text={`${fy.rep || '—'}: ${money(fy.amount)}`}
         />
