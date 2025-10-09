@@ -315,7 +315,7 @@ export default function DashboardPage({
             onClick={load}
             disabled={loading}
           >
-            {loading ? 'Refreshing…' : 'Refresh'}
+            {loading ? <><i className="ri-loader-4-line animate-spin mr-1" />Refreshing…</> : 'Refresh'}
           </button>
         </div>
       </div>
@@ -327,6 +327,7 @@ export default function DashboardPage({
 
       {/* KPIs Section: shared bg, no inner borders/cards */}
       <section className="rounded-2xl bg-neutral-900/70 p-4 sm:p-6 lg:p-8">
+        {loading && <div className="absolute inset-0 rounded-2xl bg-black/20 backdrop-blur-[1px] pointer-events-none" />}
         {/* HERO BAND */}
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
           <KpiStat
@@ -366,6 +367,7 @@ export default function DashboardPage({
 
         {/* PROGRESS CARDS (ensure these are borderless too) */}
         <div className="grid grid-cols-1 gap-16 sm:grid-cols-2 lg:grid-cols-4">
+
           <ProgressStat
             // add variant="plain" inside ProgressStat if it has its own card chrome
             label="Sales vs Target"
@@ -397,6 +399,7 @@ export default function DashboardPage({
 
       {/* SECTION: Top Performers (podium style, borderless tiles) */}
       <section className="mt-8 rounded-2xl bg-neutral-900/70 p-4 sm:p-6 lg:p-8">
+        {loading && <div className="absolute inset-0 rounded-2xl bg-black/20 backdrop-blur-[1px] pointer-events-none" />}
         {/* header row */}
         {/* <div className="mb-5 flex items-center justify-between">
           <div>
@@ -412,11 +415,13 @@ export default function DashboardPage({
 
           return (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
               {t.map((r, i) => {
                 const share = Math.max(0, Math.min(1, Number(r.sales || 0) / teamTotal));
                 const big = i === 0; // emphasize #1
                 return (
                   <div key={`${r.rep}-${i}`} className="relative isolate rounded-xl p-4 sm:p-6">
+                    {loading && <div className="absolute inset-0 rounded-2xl bg-black/20 backdrop-blur-[1px] pointer-events-none" />}
                     {/* subtle glow for each rank, strongest for #1 */}
                     <div
                       className={`pointer-events-none absolute inset-0 -z-0 rounded-[20px] blur-2xl ${podiumGlow(i)}`}
