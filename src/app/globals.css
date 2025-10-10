@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* :root {
   color-scheme: dark;
-}
+} */
 
 html,
 body {
@@ -24,4 +24,97 @@ body {
   html {
     color-scheme: dark;
   }
+}
+
+/* ---------- THEME TOKENS (LIGHT) ---------- */
+:root {
+  /* Surfaces */
+  --page: theme(colors.zinc.50);
+  /* page bg */
+  --surface: theme(colors.white);
+  /* white cards */
+  --surface-2: theme(colors.zinc.50);
+  /* secondary tiles/rows */
+  --border: theme(colors.zinc.200);
+  /* card borders/separators */
+  --ring: rgba(212, 212, 216, 0.6);
+  /* zinc-300 @ 60% */
+  --hover: theme(colors.zinc.100);
+  /* light hover fill */
+  --muted: rgba(113, 113, 122, 0.08);
+  /* zinc-500 @ 8% */
+
+  /* Text */
+  --text: theme(colors.zinc.900);
+  --text-dim: theme(colors.zinc.600);
+
+  /* Progress / status */
+  --bar-muted: theme(colors.zinc.200);
+  --good: theme(colors.emerald.500);
+  --warn: theme(colors.amber.500);
+  --bad: theme(colors.rose.500);
+
+  /* Accents for tiny charts/lines */
+  --line-up: theme(colors.emerald.500);
+  --line-down: theme(colors.rose.500);
+}
+
+/* ---------- THEME TOKENS (DARK) ---------- */
+.dark {
+  --page: theme(colors.neutral.950);
+  --surface: rgb(23 23 23 / 0.70);
+  /* your existing */
+  --surface-2: rgb(38 38 38 / 1);
+  --border: rgb(255 255 255 / 0.06);
+  --ring: rgb(255 255 255 / 0.10);
+  --hover: rgb(255 255 255 / 0.05);
+  --muted: rgb(255 255 255 / 0.06);
+
+  --text: theme(colors.zinc.50);
+  --text-dim: theme(colors.neutral.400);
+
+  --bar-muted: rgb(63 63 70 / 1);
+  --good: theme(colors.emerald.400);
+  --warn: theme(colors.amber.400);
+  --bad: theme(colors.rose.400);
+
+  --line-up: theme(colors.emerald.400);
+  --line-down: theme(colors.rose.400);
+}
+
+/* ---------- Utility helpers so components don’t change ---------- */
+.bg-page {
+  background-color: var(--page);
+}
+
+.bg-surface {
+  background-color: var(--surface);
+}
+
+.bg-surface-2 {
+  background-color: var(--surface-2);
+}
+
+.bg-hover {
+  background-color: var(--hover);
+}
+
+.bg-bar-muted {
+  background-color: var(--bar-muted);
+}
+
+.text-body {
+  color: var(--text);
+}
+
+.text-dim {
+  color: var(--text-dim);
+}
+
+.border-token {
+  border-color: var(--border);
+}
+
+.ring-token {
+  box-shadow: 0 0 0 1px var(--ring);
 }

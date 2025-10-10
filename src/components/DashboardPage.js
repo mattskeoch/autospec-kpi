@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { fetchJSON, currentYearMonth } from '@/lib/api';
 import Link from 'next/link';
+import RefreshButton from '@/components/RefreshButton';
 import KpiStat from '@/components/KpiStat';
 import Highlights from '@/components/Highlights';
 import Section from '@/components/Section';
 import ProgressStat from '@/components/ProgressStat';
 import RepTable from '@/components/RepTable';
+
 
 const AUD0 = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
 const INT0 = new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 });
@@ -244,15 +246,15 @@ export default function DashboardPage({
     try {
       setLoading(true);
       setErr('');
-
       const ym = currentYearMonth();
+      const bust = `?_=${Date.now()}`;
 
       const [k, r, h, t, sl] = await Promise.all([
-        fetchJSON('kpis/mtd'),
-        fetchJSON('rep-table'),
-        fetchJSON('kpis/highlights'),
-        fetchJSON(`targets?month=${ym}`),
-        fetchJSON('sales-log'),
+        fetchJSON(`kpis/mtd${bust}`),
+        fetchJSON(`rep-table${bust}`),
+        fetchJSON(`kpis/highlights${bust}`),
+        fetchJSON(`targets?month=${ym}${bust}`),
+        fetchJSON(`sales-log${bust}`),
       ]);
 
       setKpis(k);
@@ -267,16 +269,26 @@ export default function DashboardPage({
     }
   }, []);
 
+  // keyboard shortcut: press "r" (not inside inputs)
   useEffect(() => {
-    if (!hasInitialData) {
-      load();
-    }
-  }, [hasInitialData, load]);
+    const onKey = (e) => {
+      if (e.key.toLowerCase() !== 'r') return;
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || e.metaKey || e.ctrlKey || e.altKey) return;
+      e.preventDefault();
+      if (!loading) load();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [load, loading]);
 
   const top = top3(reps.rows);
   // --- computed values for progress vs targets (org-level) ---
   const salesTarget = pickTarget(targets?.rows, 'sales');       // scope='org', key='all'
   const depositsTarget = pickTarget(targets?.rows, 'deposits');
+  const onlineTarget = pickTarget(targets?.rows, 'sales', 'org', 'online');
+  const partnerTarget = pickTarget(targets?.rows, 'sales', 'org', 'partner');
+
 
   const salesProgressPct = salesTarget
     ? Math.min(1, Number(kpis?.total_mtd || 0) / salesTarget)
@@ -284,6 +296,14 @@ export default function DashboardPage({
 
   const depositsProgressPct = depositsTarget
     ? Math.min(1, Number(high?.totals?.total_deposits_mtd || 0) / depositsTarget)
+    : 0;
+
+  const onlineProgressPct = onlineTarget
+    ? Math.min(1, Number(high?.totals?.online_sales_mtd || 0) / onlineTarget)
+    : 0;
+
+  const partnerProgressPct = partnerTarget
+    ? Math.min(1, Number(high?.totals?.partner_sales_mtd || 0) / partnerTarget)
     : 0;
 
   const lineAll = makeSparkSeries(salesLog, { scope: 'all' });
@@ -306,17 +326,11 @@ export default function DashboardPage({
         <div className="flex items-center gap-2">
           <Link
             href="/sales-log"
-            className="rounded-xl bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-2 text-sm font-semibold"
+            className="rounded-xl bg-surface hover:bg-zinc-900 text-neutral-400 px-3 py-2 text-sm font-normal"
           >
             View Sales Log
           </Link>
-          <button
-            className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 text-sm font-semibold disabled:opacity-60"
-            onClick={load}
-            disabled={loading}
-          >
-            {loading ? <><i className="ri-loader-4-line animate-spin mr-1" />Refreshing…</> : 'Refresh'}
-          </button>
+          <RefreshButton onClick={load} loading={loading} />
         </div>
       </div>
       <p className="text-xs text-neutral-400 mt-4">
@@ -326,8 +340,7 @@ export default function DashboardPage({
       {err ? <p className="text-red-400 text-sm mb-4">Error: {err}</p> : null}
 
       {/* KPIs Section: shared bg, no inner borders/cards */}
-      <section className="rounded-2xl bg-neutral-900/70 p-4 sm:p-6 lg:p-8">
-        {loading && <div className="absolute inset-0 rounded-2xl bg-black/20 backdrop-blur-[1px] pointer-events-none" />}
+      <section className="rounded-2xl bg-surface p-4 sm:p-6 lg:p-8">
         {/* HERO BAND */}
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
           <KpiStat
@@ -388,10 +401,15 @@ export default function DashboardPage({
           <ProgressStat
             label="Online Sales vs Target"
             value={Number(high?.totals?.online_sales_mtd || 0)}
+            target={Number(onlineTarget || 0)}
+            percent={onlineProgressPct}
           />
+
           <ProgressStat
             label="Partner Sales vs Target"
             value={Number(high?.totals?.partner_sales_mtd || 0)}
+            target={Number(partnerTarget || 0)}
+            percent={partnerProgressPct}
           />
         </div>
       </section>
@@ -399,7 +417,6 @@ export default function DashboardPage({
 
       {/* SECTION: Top Performers (podium style, borderless tiles) */}
       <section className="mt-8 rounded-2xl bg-neutral-900/70 p-4 sm:p-6 lg:p-8">
-        {loading && <div className="absolute inset-0 rounded-2xl bg-black/20 backdrop-blur-[1px] pointer-events-none" />}
         {/* header row */}
         {/* <div className="mb-5 flex items-center justify-between">
           <div>
@@ -421,7 +438,6 @@ export default function DashboardPage({
                 const big = i === 0; // emphasize #1
                 return (
                   <div key={`${r.rep}-${i}`} className="relative isolate rounded-xl p-4 sm:p-6">
-                    {loading && <div className="absolute inset-0 rounded-2xl bg-black/20 backdrop-blur-[1px] pointer-events-none" />}
                     {/* subtle glow for each rank, strongest for #1 */}
                     <div
                       className={`pointer-events-none absolute inset-0 -z-0 rounded-[20px] blur-2xl ${podiumGlow(i)}`}
