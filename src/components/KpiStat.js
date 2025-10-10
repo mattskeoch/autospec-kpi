@@ -25,7 +25,11 @@ export default function KpiStat({
       ? 'rounded-2xl bg-neutral-900/70 border border-white/10 p-5 sm:p-6'
       : 'p-4 bg-transparent border-0';
 
-  const weightClass = valueWeight === 'bold' ? 'font-bold' : 'font-extrabold';
+  const weightClass =
+    valueWeight === 'semibold' ? 'font-semibold'
+      : valueWeight === 'bold' ? 'font-bold'
+        : 'font-extrabold'; // default
+
 
   return (
     <div className={`${shell} flex items-center justify-between gap-6`}>

@@ -353,7 +353,7 @@ export default function DashboardPage({
             deltaUp={(kpis.delta_east_vs_last_month ?? 0) >= 0}
             line={lineEast}
             accent={accentEast}
-            valueWeight="bold"
+            valueWeight="semibold"
           />
 
           <KpiStat
@@ -365,7 +365,7 @@ export default function DashboardPage({
             deltaUp={(kpis.delta_west_vs_last_month ?? 0) >= 0}
             line={lineWest}
             accent={accentWest}
-            valueWeight="bold"
+            valueWeight="semibold"
           />
 
         </div>
