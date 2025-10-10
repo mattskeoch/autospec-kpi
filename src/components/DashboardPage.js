@@ -199,9 +199,9 @@ function podiumGlow(rankIndex) {
     case 0:
       return 'opacity-30 bg-[radial-gradient(120%_120%_at_50%_30%,rgba(251,191,36,0.26),rgba(251,191,36,0.10)_42%,transparent_70%)]';
     case 1:
-      return 'opacity-0 bg-[radial-gradient(120%_120%_at_50%_30%,rgba(206,212,218,0.20),rgba(206,212,218,0.06)_42%,transparent_70%)]';
+      return 'opacity-20 bg-[radial-gradient(120%_120%_at_50%_30%,rgba(206,212,218,0.20),rgba(206,212,218,0.06)_42%,transparent_70%)]';
     default:
-      return 'opacity-0 bg-[radial-gradient(120%_120%_at_50%_30%,rgba(205,127,50,0.18),rgba(205,127,50,0.06)_42%,transparent_70%)]';
+      return 'opacity-20 bg-[radial-gradient(120%_120%_at_50%_30%,rgba(205,127,50,0.18),rgba(205,127,50,0.06)_42%,transparent_70%)]';
   }
 }
 const podiumNumberIcon = (i) => (i === 0 ? 'ri-number-1' : i === 1 ? 'ri-number-2' : 'ri-number-3');
@@ -343,6 +343,7 @@ export default function DashboardPage({
             line={lineAll}
             accent={accentAll}
           />
+
           <KpiStat
             variant="plain"
             label="East"
@@ -352,7 +353,9 @@ export default function DashboardPage({
             deltaUp={(kpis.delta_east_vs_last_month ?? 0) >= 0}
             line={lineEast}
             accent={accentEast}
+            valueWeight="bold"
           />
+
           <KpiStat
             variant="plain"
             label="West"
@@ -362,7 +365,9 @@ export default function DashboardPage({
             deltaUp={(kpis.delta_west_vs_last_month ?? 0) >= 0}
             line={lineWest}
             accent={accentWest}
+            valueWeight="bold"
           />
+
         </div>
 
         <div className="mt-8" />

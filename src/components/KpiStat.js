@@ -13,16 +13,19 @@ export default function KpiStat({
   label,
   value,
   hint = 'vs last period',
-  delta = null,                 // number like 0.368 -> 36.8%
-  deltaUp = true,               // green vs red
-  line = [],                    // sparkline numbers
-  accent = 'text-emerald-400',  // stroke colour for the line
-  variant = 'plain',            // 'plain' (no bg/border) | 'card' (old look)
+  delta = null,
+  deltaUp = true,
+  line = [],
+  accent = 'text-emerald-400',
+  variant = 'plain',
+  valueWeight = 'extrabold', // 'extrabold' (default) | 'bold'
 }) {
   const shell =
     variant === 'card'
       ? 'rounded-2xl bg-neutral-900/70 border border-white/10 p-5 sm:p-6'
-      : 'p-4 bg-transparent border-0'; // plain, to sit on the shared section bg
+      : 'p-4 bg-transparent border-0';
+
+  const weightClass = valueWeight === 'bold' ? 'font-bold' : 'font-extrabold';
 
   return (
     <div className={`${shell} flex items-center justify-between gap-6`}>
@@ -30,15 +33,19 @@ export default function KpiStat({
         <div className="text-sm text-neutral-300 flex items-center gap-1">
           {label}
         </div>
+
         <div className="mt-1">
           <span className="text-neutral-400 align-top mr-1">$</span>
-          <span className="text-4xl sm:text-5xl font-extrabold tabular-nums">{value}</span>
+          <span className={`text-4xl sm:text-5xl ${weightClass} tabular-nums`}>{value}</span>
         </div>
-        <div className="mt-2 text-xs text-neutral-400 flex items-center gap-2">
+
+        {/* keep hint on one line */}
+        <div className="mt-2 text-xs text-neutral-400 flex items-center gap-2 whitespace-nowrap">
           {delta != null && <Pill up={deltaUp}>{Math.round(delta * 1000) / 10}%</Pill>}
           <span>{hint}</span>
         </div>
       </div>
+
       <div className={`w-36 sm:w-44 h-16 sm:h-16 ${accent}`}>
         <Sparkline points={line} className="w-full h-full" />
       </div>
