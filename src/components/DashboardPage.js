@@ -280,6 +280,20 @@ export default function DashboardPage({
     return () => window.removeEventListener('keydown', onKey);
   }, [load, loading]);
 
+  // ✅ auto-refresh effect — place this right here
+  useEffect(() => {
+    let t;
+    const JITTER = 15_000; // ±15s to avoid herd
+    const tick = () => {
+      if (document.visibilityState === 'visible') load();
+      const base = 10 * 60 * 1000;         // 10 minutes
+      const drift = (Math.random() * 2 - 1) * JITTER;
+      t = setTimeout(tick, base + drift);
+    };
+    t = setTimeout(tick, 30_000);          // optional first refresh in 30s
+    return () => clearTimeout(t);
+  }, [load]);
+
   // Targets (org-level + special keys)
   const salesTarget = pickTarget(targets?.rows, 'sales'); // scope='org', key='all'
   const depositsTarget = pickTarget(targets?.rows, 'deposits');
