@@ -311,27 +311,24 @@ export default function DashboardPage({
 
   return (
     <main className="max-w-7xl mx-auto px-6 py-8">
-      {/* Header */}
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Autospec MTD Sales Dashboard</h1>
+        <h1 className="text-2xl font-semibold">MTD Sales Dashboard</h1>
         <div className="flex items-center gap-2">
           <Link
             href="/sales-log"
-            className="rounded-xl bg-surface px-3 py-2 text-sm font-normal text-neutral-400 hover:bg-zinc-900"
+            className="rounded-xl bg-surface border border-white/10 px-3 py-2 text-sm font-normal text-neutral-400 hover:bg-zinc-900"
           >
             View Sales Log
           </Link>
           <RefreshButton onClick={load} loading={loading} />
         </div>
       </div>
-      <p className="mt-4 text-xs text-neutral-400">
+      {/* <p className="mt-4 text-xs text-neutral-400">
         As of {kpis.as_of || reps.as_of || high?.as_of || salesLog?.as_of || ''}
-      </p>
+      </p> */}
       {err ? <p className="mb-4 text-sm text-red-400">Error: {err}</p> : null}
 
-      {/* KPIs + progress: shared section background */}
       <section className="rounded-2xl bg-surface p-4 sm:p-6 lg:p-8">
-        {/* Hero KPIs */}
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
           <KpiStat
             variant="plain"
@@ -372,7 +369,6 @@ export default function DashboardPage({
 
         <div className="mt-8" />
 
-        {/* Progress KPIs */}
         <div className="grid grid-cols-1 gap-16 sm:grid-cols-2 lg:grid-cols-4">
           <ProgressStat label="Sales vs Target" value={Number(kpis?.total_mtd || 0)} target={Number(salesTarget || 0)} percent={salesProgressPct} />
           <ProgressStat label="Deposits vs Target" value={Number(high?.totals?.total_deposits_mtd || 0)} target={Number(depositsTarget || 0)} percent={depositsProgressPct} />
@@ -381,7 +377,6 @@ export default function DashboardPage({
         </div>
       </section>
 
-      {/* Top performers + highlights + leaderboard */}
       <section className="mt-8 rounded-2xl bg-neutral-900/70 p-4 sm:p-6 lg:p-8">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {top.map((r, i) => {
