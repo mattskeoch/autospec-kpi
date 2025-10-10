@@ -33,13 +33,8 @@ function ThemeInitScript() {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <ThemeInitScript />
-      </head>
-      <body className="bg-page text-body antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+    <html lang="en" className="dark">
+      <body className="bg-page text-body">{children}</body>
     </html>
   );
 }

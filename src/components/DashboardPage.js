@@ -386,8 +386,8 @@ export default function DashboardPage({
         <div className="grid grid-cols-1 gap-16 sm:grid-cols-2 lg:grid-cols-4">
           <ProgressStat label="Sales vs Target" value={Number(kpis?.total_mtd || 0)} target={Number(salesTarget || 0)} percent={salesProgressPct} />
           <ProgressStat label="Deposits vs Target" value={Number(high?.totals?.total_deposits_mtd || 0)} target={Number(depositsTarget || 0)} percent={depositsProgressPct} />
-          <ProgressStat label="Online Sales vs Target" value={Number(high?.totals?.online_sales_mtd || 0)} target={Number(onlineTarget || 0)} percent={onlineProgressPct} />
           <ProgressStat label="Partner Sales vs Target" value={Number(high?.totals?.partner_sales_mtd || 0)} target={Number(partnerTarget || 0)} percent={partnerProgressPct} />
+          <ProgressStat label="Online Sales vs Target" value={Number(high?.totals?.online_sales_mtd || 0)} target={Number(onlineTarget || 0)} percent={onlineProgressPct} />
         </div>
       </section>
 

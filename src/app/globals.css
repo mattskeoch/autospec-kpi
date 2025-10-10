@@ -2,64 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* :root {
-  color-scheme: dark;
-} */
-
-html,
-body {
-  background: #0b0b0c;
-}
-
-
+/* ---- Base (force dark) ---- */
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  background: #0b0b0c;
+  /* fallback before vars load */
 }
 
+/* No prefers-color-scheme; no light tokens */
+/* We run in dark only for now. Add .theme-light later if needed. */
 
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
-
-/* ---------- THEME TOKENS (LIGHT) ---------- */
-:root {
-  /* Surfaces */
-  --page: theme(colors.zinc.50);
-  /* page bg */
-  --surface: theme(colors.white);
-  /* white cards */
-  --surface-2: theme(colors.zinc.50);
-  /* secondary tiles/rows */
-  --border: theme(colors.zinc.200);
-  /* card borders/separators */
-  --ring: rgba(212, 212, 216, 0.6);
-  /* zinc-300 @ 60% */
-  --hover: theme(colors.zinc.100);
-  /* light hover fill */
-  --muted: rgba(113, 113, 122, 0.08);
-  /* zinc-500 @ 8% */
-
-  /* Text */
-  --text: theme(colors.zinc.900);
-  --text-dim: theme(colors.zinc.600);
-
-  /* Progress / status */
-  --bar-muted: theme(colors.zinc.200);
-  --good: theme(colors.emerald.500);
-  --warn: theme(colors.amber.500);
-  --bad: theme(colors.rose.500);
-
-  /* Accents for tiny charts/lines */
-  --line-up: theme(colors.emerald.500);
-  --line-down: theme(colors.rose.500);
-}
-
-/* ---------- THEME TOKENS (DARK) ---------- */
+/* ---------- THEME TOKENS (DARK ONLY) ---------- */
+:root,
 .dark {
   --page: theme(colors.neutral.950);
   --surface: rgb(23 23 23 / 0.70);
@@ -82,7 +38,7 @@ body {
   --line-down: theme(colors.rose.400);
 }
 
-/* ---------- Utility helpers so components don’t change ---------- */
+/* ---------- Utility helpers ---------- */
 .bg-page {
   background-color: var(--page);
 }
