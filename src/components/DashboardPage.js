@@ -245,14 +245,15 @@ export default function DashboardPage({
       setLoading(true);
       setErr('');
       const ym = currentYearMonth();
-      const bust = `?_=${Date.now()}`;
+      const ts = Date.now();
+      const withBust = (path) => `${path}${path.includes('?') ? '&' : '?'}_=${ts}`;
 
       const [k, r, h, t, sl] = await Promise.all([
-        fetchJSON(`kpis/mtd${bust}`),
-        fetchJSON(`rep-table${bust}`),
-        fetchJSON(`kpis/highlights${bust}`),
-        fetchJSON(`targets?month=${ym}${bust}`),
-        fetchJSON(`sales-log${bust}`),
+        fetchJSON(withBust('kpis/mtd')),
+        fetchJSON(withBust('rep-table')),
+        fetchJSON(withBust('kpis/highlights')),
+        fetchJSON(withBust(`targets?month=${ym}`)),
+        fetchJSON(withBust('sales-log')),
       ]);
 
       setKpis(k);
