@@ -36,6 +36,28 @@ function pickTarget(rows, metric, scope = 'org', key = 'all') {
   return Number(row?.target || 0);
 }
 
+/* Enrich rep rows with progress percentages based on targets */
+function enrichRepsWithProgress(repsRows, targetsRows) {
+  return (repsRows || []).map((rep) => {
+    const repName = (rep.rep || '').toLowerCase();
+    const salesTarget = pickTarget(targetsRows, 'sales', 'rep', repName);
+    const depositsTarget = pickTarget(targetsRows, 'deposits', 'rep', repName);
+
+    const salesProgress = salesTarget > 0
+      ? Math.min(1, Number(rep.sales || 0) / salesTarget)
+      : 0;
+    const depositProgress = depositsTarget > 0
+      ? Math.min(1, Number(rep.deposits || 0) / depositsTarget)
+      : 0;
+
+    return {
+      ...rep,
+      salesProgress,
+      depositProgress,
+    };
+  });
+}
+
 /* Default shapes to avoid optional chaining noise everywhere */
 const DEFAULT_KPIS = { total_mtd: 0, east_mtd: 0, west_mtd: 0, as_of: '' };
 const DEFAULT_REPS = { rows: [], as_of: '' };
@@ -324,6 +346,9 @@ export default function DashboardPage({
 
   const top = top3(reps.rows);
 
+  // Enrich rep data with progress calculations based on targets
+  const enrichedReps = enrichRepsWithProgress(reps.rows, targets?.rows);
+
   return (
     <main className="max-w-7xl mx-auto px-6 py-8">
       <div className="mb-4 flex items-center justify-between">
@@ -427,7 +452,7 @@ export default function DashboardPage({
         </div>
 
         <div className="mt-8">
-          <RepTable rows={reps.rows || []} />
+          <RepTable rows={enrichedReps} />
         </div>
       </section>
     </main>
