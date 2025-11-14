@@ -58,11 +58,11 @@ function makeSparkSeries(input, { scope = 'all', debug = false } = {}) {
     );
 
   const pickDate = (r) =>
-    r?.date_utc ??
+    r?.date_awst ??
     r?.created_at ??
     r?.created_at_utc ??
     r?.last_updated_at ??
-    r?.fulfillment_date_utc ??
+    r?.fulfillment_date_awst ??
     r?.date ??
     null;
 
@@ -151,11 +151,11 @@ function hasSaleToday(input, { scope = 'all' } = {}) {
     );
 
   const pickDate = (r) =>
-    r?.date_utc ??
+    r?.date_awst ??
     r?.created_at ??
     r?.created_at_utc ??
     r?.last_updated_at ??
-    r?.fulfillment_date_utc ??
+    r?.fulfillment_date_awst ??
     r?.date ??
     null;
 
