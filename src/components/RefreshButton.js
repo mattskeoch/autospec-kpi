@@ -9,7 +9,7 @@ export default function RefreshButton({ onClick, loading }) {
       title="Refresh data (R)"
     >
       {loading ? <i className="ri-loader-4-line animate-spin" /> : <i className="ri-refresh-line" />}
-      <span>{loading ? 'Refreshing…' : 'Refresh'}</span>
+      <span className="hidden sm:inline">{loading ? 'Refreshing…' : 'Refresh'}</span>
     </button>
   );
 }

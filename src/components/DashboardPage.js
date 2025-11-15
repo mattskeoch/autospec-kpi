@@ -352,13 +352,13 @@ export default function DashboardPage({
   return (
     <main className="max-w-7xl mx-auto px-6 py-8">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">MTD Sales Dashboard</h1>
+        <h1 className="text-[1.3rem] sm:text-2xl font-semibold">MTD Sales Dashboard</h1>
         <div className="flex items-center gap-2">
           <Link
             href="/sales-log"
             className="rounded-xl bg-surface border border-white/10 px-3 py-2 text-sm font-normal text-neutral-400 hover:bg-zinc-900"
           >
-            View Sales Log
+            Sales Log
           </Link>
           <RefreshButton onClick={load} loading={loading} />
         </div>
